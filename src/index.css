@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0a0a0f;
+  color: #e7e7ef;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a38;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a4a;
+}
+
+@layer components {
+  .glass {
+    background: rgba(18, 18, 26, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .panel {
+    @apply bg-panel border border-edge;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium
+           transition-colors duration-150;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-[#6b4ce6] shadow-glow;
+  }
+  .btn-ghost {
+    @apply btn text-muted hover:text-white hover:bg-panel2;
+  }
+  .chip {
+    @apply rounded-full px-3 py-1 text-xs font-medium border border-edge text-muted
+           hover:text-white hover:border-accent transition-colors cursor-pointer;
+  }
+  .chip-active {
+    @apply bg-accent/20 border-accent text-white;
+  }
+}
+
+/* Range slider styling */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 4px;
+  background: #2a2a38;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #7c5cff;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(124, 92, 255, 0.6);
+}
