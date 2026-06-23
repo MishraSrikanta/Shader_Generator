@@ -1,23 +1,36 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ShaderBackground from '../components/ShaderBackground'
 import { SHADERS, getShader } from '../shaders/library'
 
 const HERO_IDS = ['aurora-borealis', 'galaxy', 'plasma', 'fbm-clouds']
+const HERO_INTERVAL = 5000 // ms
 
 export default function Landing() {
   const nav = useNavigate()
   const [heroIdx, setHeroIdx] = useState(0)
   const heroDef = useMemo(() => getShader(HERO_IDS[heroIdx]), [heroIdx])
 
+  // Auto-advance the hero shader every 5s. Re-running on heroIdx change means a manual
+  // click also resets the countdown, so it always waits a full interval after any switch.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setHeroIdx((i) => (i + 1) % HERO_IDS.length)
+    }, HERO_INTERVAL)
+    return () => clearTimeout(id)
+  }, [heroIdx])
+
   return (
-    <div className="relative h-full w-full overflow-hidden bg-bg">
-      <ShaderBackground def={heroDef} />
-      <div className="absolute inset-0 bg-gradient-to-b from-bg/30 via-bg/10 to-bg/80" />
+    <div className="relative h-full w-full overflow-y-auto bg-bg lg:overflow-hidden">
+      {/* fixed background so it stays put while the page scrolls on mobile */}
+      <div className="fixed inset-0 z-0">
+        <ShaderBackground def={heroDef} />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/30 via-bg/10 to-bg/80" />
+      </div>
 
       {/* nav */}
-      <header className="absolute top-0 z-10 flex w-full items-center justify-between px-8 py-6">
+      <header className="absolute top-0 z-10 flex w-full items-center justify-between px-4 py-5 sm:px-8 sm:py-6">
         <div className="flex items-center gap-2 text-lg font-bold tracking-tight">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent shadow-glow">◈</span>
           Shader<span className="text-accent2">Studio</span>
@@ -40,7 +53,7 @@ export default function Landing() {
       </header>
 
       {/* hero */}
-      <main className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+      <main className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center px-6 pb-28 pt-24 text-center lg:pb-0 lg:pt-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,7 +67,7 @@ export default function Landing() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight md:text-7xl"
+          className="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-7xl"
         >
           Design shaders
           <br />
@@ -105,8 +118,9 @@ export default function Landing() {
         </div>
       </main>
 
-      {/* feature strip */}
-      <div className="absolute bottom-0 z-10 w-full">
+      {/* feature strip — in normal flow on mobile (so it can't overlap the CTA),
+          pinned to the bottom on desktop */}
+      <div className="relative z-10 w-full lg:absolute lg:bottom-0 lg:left-0">
         <div className="glass mx-auto mb-3 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-2 rounded-2xl px-6 py-3 text-xs text-muted">
           <span>{SHADERS.length} built-in shaders</span>
           <span className="text-edge">•</span>

@@ -46,8 +46,8 @@ export default function Toolbar() {
   const paused = useStore((s) => s.paused)
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-edge bg-panel px-4 py-2">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between gap-3 overflow-x-auto border-b border-edge bg-panel px-3 py-2 sm:px-4">
+      <div className="flex shrink-0 items-center gap-3">
         <button
           className="flex items-center gap-1.5 text-sm font-bold"
           onClick={() => nav('/')}
@@ -75,7 +75,7 @@ export default function Toolbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <Toggle on={!paused} onClick={() => toggle('paused')}>
           {paused ? '▶ Play' : '⏸ Pause'}
         </Toggle>
@@ -114,7 +114,7 @@ export default function Toolbar() {
         <div className="mx-1 h-5 w-px bg-edge" />
 
         <a
-          className="btn-ghost px-2 py-1 text-xs"
+          className="btn-ghost hidden whitespace-nowrap px-2 py-1 text-xs md:inline-flex"
           href="https://srikantalandingpage.vercel.app/"
           target="_blank"
           rel="noreferrer"

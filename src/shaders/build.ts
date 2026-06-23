@@ -15,10 +15,27 @@ const GLSL_TYPE: Record<string, string> = {
   bool: 'bool',
 }
 
-/** Auto-generated declarations for a shader's custom uniforms. */
-export function declareUniforms(uniforms: UniformMap): string {
+function fmtFloat(n: number): string {
+  return Number.isInteger(n) ? n.toFixed(1) : String(n)
+}
+
+/** GLSL literal for a uniform's current value (used in export comments). */
+function glslValue(u: UniformMap[string]): string {
+  if (u.type === 'color') return `vec3(${u.value.map(fmtFloat).join(', ')})`
+  if (u.type === 'vec2') return `vec2(${u.value.map(fmtFloat).join(', ')})`
+  if (u.type === 'bool') return String(u.value)
+  return fmtFloat(u.value)
+}
+
+/** Auto-generated declarations for a shader's custom uniforms.
+ *  When `withValues` is set, the current value is appended to each comment so exported
+ *  GLSL reflects live edits to the parameters. */
+export function declareUniforms(uniforms: UniformMap, withValues = false): string {
   return Object.entries(uniforms)
-    .map(([name, u]) => `uniform ${GLSL_TYPE[u.type]} ${name}; // ${u.label}`)
+    .map(([name, u]) => {
+      const comment = withValues ? `${u.label} = ${glslValue(u)}` : u.label
+      return `uniform ${GLSL_TYPE[u.type]} ${name}; // ${comment}`
+    })
     .join('\n')
 }
 
@@ -104,10 +121,10 @@ void main(){
 
 /** Vertex wrapper for VERTEX-kind shaders: calls displace(), then recomputes the
  *  normal analytically by sampling displace() along two surface tangents. */
-function buildVertexProgram(def: ShaderDef): string {
+function buildVertexProgram(def: ShaderDef, withValues = false): string {
   return `precision highp float;
 ${COMMON_UNIFORMS}
-${declareUniforms(def.uniforms)}
+${declareUniforms(def.uniforms, withValues)}
 varying vec3 vNormal;
 varying vec3 vView;
 varying float vDisp;
@@ -140,12 +157,12 @@ void main(){
 }
 
 /** Full FRAGMENT shader source for a fragment-kind shader. */
-function buildFragmentProgram(def: ShaderDef): string {
+function buildFragmentProgram(def: ShaderDef, withValues = false): string {
   return `precision highp float;
 
 varying vec2 vUv;
 ${COMMON_UNIFORMS}
-${declareUniforms(def.uniforms)}
+${declareUniforms(def.uniforms, withValues)}
 ${def.fragment}`
 }
 
@@ -330,14 +347,14 @@ void gen_asphalt(vec3 p, out vec3 a, out float r, out float m){
 }`
 
 /** Full FRAGMENT shader for a MATERIAL-kind shader (procedural surface + GGX lighting). */
-function buildMaterialProgram(def: ShaderDef): string {
+function buildMaterialProgram(def: ShaderDef, withValues = false): string {
   return `precision highp float;
 varying vec2 vUv;
 varying vec3 vNormalW;
 varying vec3 vPosW;
 varying vec3 vViewW;
 ${COMMON_UNIFORMS}
-${declareUniforms(def.uniforms)}
+${declareUniforms(def.uniforms, withValues)}
 ${GLSL_HELPERS}
 ${MATERIAL_GENERATORS}
 
@@ -373,18 +390,20 @@ void main(){
 }`
 }
 
-/** Vertex shader source for any shader kind. */
-export function buildVertex(def: ShaderDef): string {
-  if (def.kind === 'vertex') return buildVertexProgram(def)
+/** Vertex shader source for any shader kind. Pass withValues to embed current
+ *  parameter values as comments (used for code export so it reflects live edits). */
+export function buildVertex(def: ShaderDef, withValues = false): string {
+  if (def.kind === 'vertex') return buildVertexProgram(def, withValues)
   if (def.kind === 'material') return MATERIAL_VERTEX.trim()
   return VERTEX_SHADER.trim()
 }
 
-/** Fragment shader source for any shader kind. */
-export function buildFragment(def: ShaderDef): string {
+/** Fragment shader source for any shader kind. Pass withValues to embed current
+ *  parameter values as comments. */
+export function buildFragment(def: ShaderDef, withValues = false): string {
   if (def.kind === 'vertex') return VERTEX_FRAGMENT
-  if (def.kind === 'material') return buildMaterialProgram(def)
-  return buildFragmentProgram(def)
+  if (def.kind === 'material') return buildMaterialProgram(def, withValues)
+  return buildFragmentProgram(def, withValues)
 }
 
 export interface ThreeUniform {

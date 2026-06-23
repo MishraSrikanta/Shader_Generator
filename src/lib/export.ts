@@ -27,8 +27,9 @@ function jsUniformInit(uniforms: UniformMap): string {
 }
 
 export function generateExport(def: ShaderDef, target: ExportTarget): string {
-  const frag = buildFragment(def)
-  const vert = buildVertex(def)
+  // embed current parameter values as comments so exported GLSL reflects live edits
+  const frag = buildFragment(def, true)
+  const vert = buildVertex(def, true)
   const is3D = def.kind === 'vertex' || def.kind === 'material'
   // a mesh that actually shows the effect: a sphere for 3D shaders, a quad otherwise
   const geometryJsx = is3D

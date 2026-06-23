@@ -74,22 +74,27 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 border-b border-edge px-3 py-2">
-        <button
-          className={`chip ${category === null ? 'chip-active' : ''}`}
-          onClick={() => setCategory(null)}
-        >
-          All
-        </button>
-        {categories.map((c) => (
-          <button
-            key={c}
-            className={`chip ${category === c ? 'chip-active' : ''}`}
-            onClick={() => setCategory(c)}
+      <div className="border-b border-edge px-3 py-2">
+        <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted">
+          Category
+        </label>
+        <div className="relative">
+          <select
+            className="w-full appearance-none rounded-lg border border-edge bg-panel2 px-3 py-2 pr-8 text-sm text-white outline-none focus:ring-1 focus:ring-accent"
+            value={category ?? 'all'}
+            onChange={(e) => setCategory(e.target.value === 'all' ? null : e.target.value)}
           >
-            {c}
-          </button>
-        ))}
+            <option value="all">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+            ▾
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
